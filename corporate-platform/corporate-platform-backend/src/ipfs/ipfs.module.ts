@@ -21,6 +21,7 @@ import { DatabaseModule } from '../shared/database/database.module';
   controllers: [IpfsController],
   exports: [
     IpfsService,
+    IpfsConfig,
     UploadService,
     RetrievalService,
     PinningService,
