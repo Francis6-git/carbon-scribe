@@ -24,11 +24,6 @@ vi.mock('next/image', () => ({
   },
 }))
 
-// Mock Zustand store
-vi.mock('@/lib/store/store', () => ({
-  useStore: vi.fn(),
-}))
-
 // Mock API client
 vi.mock('@/lib/api/apiClient', () => ({
   default: {
