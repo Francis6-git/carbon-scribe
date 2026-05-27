@@ -646,3 +646,17 @@ All uploaded files are scanned for malware using ClamAV before being persisted o
 - Monitor logs for scan failures or suspicious activity.
 
 See [test/ipfs-antivirus.e2e-spec.ts](test/ipfs-antivirus.e2e-spec.ts) for test scenarios.
+
+## 🔐 File Hash Verification
+
+Uploaded files are hashed with SHA-256 during upload, and the digest is persisted with each IPFS document record.
+
+- On upload:
+  - The backend computes `contentHash` (SHA-256) from the uploaded file bytes.
+  - The hash is stored on the `IpfsDocument` row.
+- On retrieval/verification:
+  - The backend recomputes SHA-256 from retrieved content.
+  - The recomputed hash is compared to the persisted `contentHash`.
+  - If they differ, the request is flagged with `integrity-check-failed` and logged as an integrity error.
+
+This provides cryptographic integrity checks for evidence and certificate payloads across storage/retrieval flows.

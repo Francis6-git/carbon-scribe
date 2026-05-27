@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as FormData from 'form-data';
 import axios from 'axios';
 import { createReadStream, unlink } from 'fs';
+import { createHash } from 'crypto';
 import { IpfsConfig } from '../ipfs.config';
 import { PrismaService } from '../../shared/database/prisma.service';
 import * as NodeClam from 'clamscan';
@@ -16,10 +17,47 @@ export class UploadService {
     private readonly prisma: PrismaService,
   ) {}
 
+  private async computeSha256(file: any): Promise<string> {
+    const hash = createHash('sha256');
+
+    if (file?.path) {
+      await new Promise<void>((resolve, reject) => {
+        const stream = createReadStream(file.path);
+        stream.on('data', (chunk) => hash.update(chunk));
+        stream.on('error', reject);
+        stream.on('end', () => resolve());
+      });
+      return hash.digest('hex');
+    }
+
+    if (file?.buffer) {
+      hash.update(file.buffer);
+      return hash.digest('hex');
+    }
+
+    throw new Error('No file data available for hashing');
+  }
+
   async upload(file: any, metadata: any) {
     if (!file) return { error: 'No file provided' };
     const idempotencyKey = metadata?.idempotencyKey;
     const companyId = metadata?.companyId || 'unknown';
+    let contentHash: string;
+
+    try {
+      contentHash = await this.computeSha256(file);
+    } catch (hashErr) {
+      this.logger.error(
+        `Hashing failed for ${file?.originalname || 'unknown file'}:`,
+        hashErr,
+      );
+      if (file.path) unlink(file.path, () => {});
+      return {
+        error: 'File hash computation failed',
+        details: hashErr?.message || hashErr,
+      };
+    }
+
     if (idempotencyKey) {
       const existing = await this.prisma.ipfsDocument.findFirst({
         where: { companyId, idempotencyKey },
@@ -126,13 +164,14 @@ export class UploadService {
           pinnedAt: new Date(),
           metadata,
           idempotencyKey: idempotencyKey || null,
+          contentHash,
         },
       });
       // Clean up file after upload (if streaming)
       if (file.path) {
         unlink(file.path, () => {});
       }
-      return { cid, record };
+      return { cid, record: { ...record, contentHash } };
     } catch (err) {
       this.logger.error('Pinata upload failed', err?.message || err);
       // fallback: return mock CID based on buffer or file
@@ -151,12 +190,17 @@ export class UploadService {
           pinnedAt: new Date(),
           metadata,
           idempotencyKey: idempotencyKey || null,
+          contentHash,
         },
       });
       if (file.path) {
         unlink(file.path, () => {});
       }
-      return { cid, record, warning: 'pinning-failed-mock-cid' };
+      return {
+        cid,
+        record: { ...record, contentHash },
+        warning: 'pinning-failed-mock-cid',
+      };
     }
   }
 

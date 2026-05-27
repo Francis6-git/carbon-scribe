@@ -1126,6 +1126,7 @@ model IpfsDocument {
   pinnedAt        DateTime
   metadata        Json?
   idempotencyKey  String?
+  contentHash     String?
   createdAt       DateTime  @default(now())
   expiresAt       DateTime?
 
