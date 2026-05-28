@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { createHash } from 'crypto';
 import { UploadService } from './upload.service';
 import { IpfsConfig } from '../ipfs.config';
@@ -24,11 +23,19 @@ describe('UploadService hash persistence', () => {
     },
   } as any;
 
+  const mockProvider = {
+    providerName: 'mock',
+    pinFile: jest.fn().mockResolvedValue('cid123'),
+    getContent: jest.fn(),
+    unpin: jest.fn(),
+    pinBatch: jest.fn(),
+  } as any;
+
   let service: UploadService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new UploadService(new IpfsConfig(), mockPrisma);
+    service = new UploadService(new IpfsConfig(), mockPrisma, mockProvider);
     mockPrisma.ipfsDocument.findFirst.mockResolvedValue(null);
     mockPrisma.ipfsDocument.create.mockResolvedValue({
       id: 'doc1',
@@ -39,10 +46,6 @@ describe('UploadService hash persistence', () => {
   it('computes and persists SHA-256 contentHash for uploaded file', async () => {
     const buffer = Buffer.from('hash-me');
     const expectedHash = createHash('sha256').update(buffer).digest('hex');
-
-    jest
-      .spyOn(axios, 'post')
-      .mockResolvedValueOnce({ data: { IpfsHash: 'cid123' } } as any);
 
     const file = {
       originalname: 'test.txt',
@@ -61,10 +64,7 @@ describe('UploadService hash persistence', () => {
     expect(mockPrisma.ipfsDocument.create).toHaveBeenCalled();
     const createCall = mockPrisma.ipfsDocument.create.mock.calls[0][0];
 
-    // Verify contentHash is passed directly to create
     expect(createCall.data.contentHash).toBe(expectedHash);
-
-    // Verify the result includes the hash
     expect(result.record.contentHash).toBe(expectedHash);
   });
 });
