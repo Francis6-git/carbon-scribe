@@ -8,10 +8,14 @@ import { PermissionsGuard } from '../src/rbac/guards/permissions.guard';
 
 // Mock guards to always allow
 class MockJwtAuthGuard {
-  canActivate() { return true; }
+  canActivate() {
+    return true;
+  }
 }
 class MockPermissionsGuard {
-  canActivate() { return true; }
+  canActivate() {
+    return true;
+  }
 }
 
 describe('RetirementHistoryController (e2e)', () => {

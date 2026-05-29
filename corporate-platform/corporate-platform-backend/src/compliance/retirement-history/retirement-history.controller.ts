@@ -30,7 +30,15 @@ export class RetirementHistoryController {
     await this.securityService.logEvent?.({
       eventType: 'report.exported',
       userId: req?.user?.id,
-      details: { entity, tokenId, dateFrom, dateTo, framework, assetType, project },
+      details: {
+        entity,
+        tokenId,
+        dateFrom,
+        dateTo,
+        framework,
+        assetType,
+        project,
+      },
       ipAddress: req?.ip,
       severity: 'info',
       status: 'success',
@@ -61,7 +69,10 @@ export class RetirementHistoryController {
       severity: 'info',
       status: 'success',
     });
-    return this.retirementHistoryService.getRetirementByToken(tokenId, framework);
+    return this.retirementHistoryService.getRetirementByToken(
+      tokenId,
+      framework,
+    );
   }
 
   @Get('entity/:address')
@@ -79,6 +90,9 @@ export class RetirementHistoryController {
       severity: 'info',
       status: 'success',
     });
-    return this.retirementHistoryService.listRetirementsByEntity(address, framework);
+    return this.retirementHistoryService.listRetirementsByEntity(
+      address,
+      framework,
+    );
   }
 }

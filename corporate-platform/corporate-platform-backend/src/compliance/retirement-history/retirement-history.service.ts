@@ -29,19 +29,29 @@ export class RetirementHistoryService {
     assetType?: string;
     project?: string;
   }) {
-    this.logger.log('Querying retirements', { entity, tokenId, dateFrom, dateTo, framework, assetType, project });
+    this.logger.log('Querying retirements', {
+      entity,
+      tokenId,
+      dateFrom,
+      dateTo,
+      framework,
+      assetType,
+      project,
+    });
     // Fetch recent retirements from contract
     const records = await this.retirementTracker.getRecentRetirementEvents();
     // Filter by parameters
     let filtered = records;
-    if (entity) filtered = filtered.filter(r => r.entity === entity);
-    if (tokenId) filtered = filtered.filter(r => r.tokenId === tokenId);
-    if (assetType) filtered = filtered.filter(r => r.assetType === assetType);
-    if (project) filtered = filtered.filter(r => r.project === project);
-    if (dateFrom) filtered = filtered.filter(r => new Date(r.retiredAt) >= dateFrom);
-    if (dateTo) filtered = filtered.filter(r => new Date(r.retiredAt) <= dateTo);
+    if (entity) filtered = filtered.filter((r) => r.entity === entity);
+    if (tokenId) filtered = filtered.filter((r) => r.tokenId === tokenId);
+    if (assetType) filtered = filtered.filter((r) => r.assetType === assetType);
+    if (project) filtered = filtered.filter((r) => r.project === project);
+    if (dateFrom)
+      filtered = filtered.filter((r) => new Date(r.retiredAt) >= dateFrom);
+    if (dateTo)
+      filtered = filtered.filter((r) => new Date(r.retiredAt) <= dateTo);
     // Framework-specific normalization (placeholder)
-    return filtered.map(r => this.normalizeForFramework(r, framework));
+    return filtered.map((r) => this.normalizeForFramework(r, framework));
   }
 
   /**
@@ -57,10 +67,13 @@ export class RetirementHistoryService {
   /**
    * List all retirements for an entity.
    */
-  async listRetirementsByEntity(entity: string, framework?: ComplianceFramework) {
+  async listRetirementsByEntity(
+    entity: string,
+    framework?: ComplianceFramework,
+  ) {
     const records = await this.retirementTracker.getRecentRetirementEvents();
-    const filtered = records.filter(r => r.entity === entity);
-    return filtered.map(r => this.normalizeForFramework(r, framework));
+    const filtered = records.filter((r) => r.entity === entity);
+    return filtered.map((r) => this.normalizeForFramework(r, framework));
   }
 
   /**

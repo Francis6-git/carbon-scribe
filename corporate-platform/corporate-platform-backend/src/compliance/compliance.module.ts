@@ -9,8 +9,16 @@ import { RetirementHistoryController } from './retirement-history/retirement-his
 
 @Module({
   imports: [SecurityModule, SorobanModule],
-  providers: [ComplianceService, RetirementVerificationService, RetirementHistoryService],
+  providers: [
+    ComplianceService,
+    RetirementVerificationService,
+    RetirementHistoryService,
+  ],
   controllers: [ComplianceController, RetirementHistoryController],
-  exports: [ComplianceService, RetirementVerificationService, RetirementHistoryService],
+  exports: [
+    ComplianceService,
+    RetirementVerificationService,
+    RetirementHistoryService,
+  ],
 })
 export class ComplianceModule {}
