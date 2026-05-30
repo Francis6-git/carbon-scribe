@@ -18,6 +18,8 @@ import type { NotificationsSlice } from "@/store/notification.types";
 import { createNotificationsSlice } from "@/store/notificationsSlice";
 import type { FinancingSlice } from "./financing/financing.types";
 import { createFinancingSlice } from "./financing/financingSlice";
+import type { GeospatialSlice } from "./geospatial/geospatial.types";
+import { createGeospatialSlice } from "./geospatial/geospatialSlice";
 
 // Unified store state type
 export type StoreState = AuthSlice &
@@ -26,7 +28,8 @@ export type StoreState = AuthSlice &
   SearchSlice &
   HealthSlice &
   NotificationsSlice &
-  FinancingSlice;
+  FinancingSlice &
+  GeospatialSlice;
 
 // Helper to check if token is expired or about to expire (60s buffer)
 const isTokenExpiringSoon = (expiresIn: number | null): boolean => {
@@ -45,6 +48,7 @@ export const useStore = create<StoreState>()(
       ...createHealthSlice(...args),
       ...createNotificationsSlice(...args),
       ...createFinancingSlice(...args),
+      ...createGeospatialSlice(...args),
     }),
     {
       name: "project-portal-store",
@@ -74,7 +78,7 @@ export const useStore = create<StoreState>()(
             }));
           }
 
-         
+          
           const path = window.location.pathname;
           const isAuthPage = path === "/login" || path === "/register";
           const isAuthenticated = state?.isAuthenticated === true;
