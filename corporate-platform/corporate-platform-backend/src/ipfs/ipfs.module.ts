@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { IpfsService } from './ipfs.service';
 import { IpfsConfig } from './ipfs.config';
+import { PinataHealthService } from './pinata-health.service';
 import { UploadService } from './services/upload.service';
 import { RetrievalService } from './services/retrieval.service';
 import { PinningService } from './services/pinning.service';
@@ -14,6 +15,7 @@ import { IPFS_PROVIDER } from './interfaces/ipfs-provider.interface';
   imports: [DatabaseModule],
   providers: [
     IpfsConfig,
+    PinataHealthService,
     // Register the active provider via injection token.
     // To switch providers, replace PinataProvider with another IIpfsProvider implementation.
     {
